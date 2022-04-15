@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import subprocess
 from scapy.all import *
 
 bold = '\033[1m'
@@ -85,7 +86,16 @@ def main():
 --------------------------Coded By SynAckID-------------------------""" + normal)
 			print("")
 			#host scan
-			interface = input(bold + "[*] Enter the interface name: " + normal)
+			print("Interface list:")
+			if os.name in ('nt', 'dos'):
+				subprocess.call('powershell.exe Get-NetAdapter | select-object name | ft -HideTableHeaders ')
+			else:
+				os.system('ifconfig')
+			
+			#print (list_int)
+			interface = input(bold + "[*] Select the interface name: " + normal)
+			while interface in [""]:
+				interface = input(bold + "[*] Enter a valid interface: " + normal)
 			sub = input(bold + "[*] Enter the subnet to scan: " + normal)
 			print("")
 			print(bold + "[*] Scanning" + normal)
@@ -105,7 +115,7 @@ def main():
 
 			for snd,rcv in ans:
 				with open("result.tmp","a") as file:
-					print(rcv.sprintf("[-] " + r"%Ether.src%   -  %ARP.psrc%"))
+					print(bold + rcv.sprintf("[-] " + r"%Ether.src%   -  %ARP.psrc%") + normal)
 					V = (rcv.sprintf("[-] " + r"%Ether.src%   -  %ARP.psrc%") +"\n")
 					file.write(V)
 					file.close()
