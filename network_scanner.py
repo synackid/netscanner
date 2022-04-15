@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import subprocess
+
 from scapy.all import *
 
 bold = '\033[1m'
@@ -88,14 +89,23 @@ def main():
 			#host scan
 			print("Interface list:")
 			if os.name in ('nt', 'dos'):
-				subprocess.call('powershell.exe Get-NetAdapter | select-object name | ft -HideTableHeaders ')
+				import psutil
+				addrs = psutil.net_if_addrs()
+				netInterfaceName = [i for i in addrs for j in addrs[i] if j.family==socket.AF_INET]
+				print(*netInterfaceName, sep='\n')
+				contents = addrs
 			else:
-				os.system('ifconfig')
-			
-			#print (list_int)
+				os.system('ls /sys/class/net/ > inet.tmp')
+				with open("inet.tmp","r") as file:
+					contents = file.read()
+					print(contents)
+					file.close()
 			interface = input(bold + "[*] Select the interface name: " + normal)
-			while interface in [""]:
-				interface = input(bold + "[*] Enter a valid interface: " + normal)
+			while interface not in contents:
+				interface = input(bold + "[*] Enter a valid interface: " + normal)	
+			
+			if os.name not in ('nt', 'dos'):
+				os.system('rm inet.tmp')
 			sub = input(bold + "[*] Enter the subnet to scan: " + normal)
 			print("")
 			print(bold + "[*] Scanning" + normal)
